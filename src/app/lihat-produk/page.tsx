@@ -183,7 +183,7 @@ export default function LihatProdukPage() {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => router.push(`/lihat-produk/${produk.id}`)}
-                      className="inline-flex justify-center items-center bg-blue-50 text-blue-700 py-2 px-3 rounded-md font-semibold hover:bg-blue-100 transition-colors text-sm"
+                      className="inline-flex justify-center items-center bg-blue-50 text-blue-700 py-2 px-3 rounded-md font-semibold hover:bg-blue-100 transition-colors text-sm cusrsor-pointer"
                     >
                       Lihat Detail
                     </button>
