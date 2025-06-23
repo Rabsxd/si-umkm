@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import Image from 'next/image';
+
+// Tambahkan import Apollo Client
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 
 // Definisikan tipe data Produk
 type Produk = {
@@ -18,6 +19,12 @@ type Produk = {
   ownerId: string;
   namaPenjual?: string;
   nomorHp?: string;
+};
+
+type User = {
+  id: string;
+  nama: string;
+  nomorHp: string;
 };
 
 // Daftar kategori produk
@@ -40,63 +47,52 @@ const IconWhatsApp = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+// Apollo Client instance
+const client = new ApolloClient({
+  uri: '/api/graphql',
+  cache: new InMemoryCache(),
+});
 
 // Komponen Halaman Lihat Produk
 export default function LihatProdukPage() {
-  const [produkList, setProdukList] = useState<Produk[]>([]);
   const [filteredList, setFilteredList] = useState<Produk[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [kategori, setKategori] = useState('Semua');
+  const [userMap, setUserMap] = useState<{ [id: string]: User }>({});
   const router = useRouter();
 
+  // Fetch produk dari GraphQL
   useEffect(() => {
-    const fetchProduk = async () => {
-      setIsLoading(true);
-      try {
-        const snapshot = await getDocs(collection(db, 'produk'));
-
-        const produkData: Produk[] = await Promise.all(
-          snapshot.docs.map(async (docItem) => {
-            const data = docItem.data();
-            const produk = { id: docItem.id, ...data } as Produk;
-
-            try {
-              const userDoc = await getDoc(doc(db, 'users', produk.ownerId));
-              if (userDoc.exists()) {
-                  const userData = userDoc.data();
-                  produk.namaPenjual = userData.username || 'Tidak diketahui';
-                  produk.nomorHp = userData.nomorHp || undefined;
-              } else {
-                  produk.namaPenjual = 'Tidak diketahui';
-              }
-            } catch (err) {
-              produk.namaPenjual = 'Gagal memuat';
-            }
-            return produk;
-          })
-        );
-
-        setProdukList(produkData);
-        setFilteredList(produkData);
-      } catch (error) {
+    setIsLoading(true);
+    fetch('/api/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ search, kategori }),
+    })
+      .then(res => res.json())
+      .then(({ data }) => {
+        setFilteredList(data.produk);
+      })
+      .catch((error) => {
         console.error("Gagal mengambil data produk:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        setFilteredList([]);
+      })
+      .finally(() => setIsLoading(false));
+  }, [search, kategori]);
 
-    fetchProduk();
-  }, []);
-
+  // Fetch semua user (seller)
   useEffect(() => {
-    let hasil = produkList.filter((item) => {
-      const cocokKategori = kategori === 'Semua' || item.kategori === kategori;
-      const cocokSearch = search.trim() === '' || item.nama.toLowerCase().includes(search.toLowerCase());
-      return cocokKategori && cocokSearch;
-    });
-    setFilteredList(hasil);
-  }, [search, kategori, produkList]);
+    fetch('/api/users') // Ganti endpoint sesuai API user kamu
+      .then(res => res.json())
+      .then((users: User[]) => {
+        const map: { [id: string]: User } = {};
+        users.forEach(user => {
+          map[user.id] = user;
+        });
+        setUserMap(map);
+      });
+  }, []);
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -184,28 +180,27 @@ export default function LihatProdukPage() {
                 </div>
                 
                 <div className="p-4 pt-0 mt-auto">
-                    {/* ✅ REVISI: Layout dan tombol diubah */}
-                    <div className="grid grid-cols-2 gap-2">
-                        <button
-                            onClick={() => router.push(`/lihat-produk/${produk.id}`)}
-                            className="inline-flex justify-center items-center bg-blue-50 text-blue-700 py-2 px-3 rounded-md font-semibold hover:bg-blue-100 transition-colors text-sm cursor-pointer"
-                        >
-                            Lihat Detail
-                        </button>
-                        {produk.nomorHp && (
-                             <a 
-                                href={`https://wa.me/${produk.nomorHp}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-3 rounded-md font-semibold hover:bg-green-600 transition-colors text-sm"
-                                title="Hubungi via WhatsApp"
-                            >
-                                <IconWhatsApp className="h-4 w-4" />
-                                <span>Hubungi</span>
-                            </a>
-                        )}
-                    </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => router.push(`/lihat-produk/${produk.id}`)}
+                      className="inline-flex justify-center items-center bg-blue-50 text-blue-700 py-2 px-3 rounded-md font-semibold hover:bg-blue-100 transition-colors text-sm"
+                    >
+                      Lihat Detail
+                    </button>
+                    {userMap[produk.ownerId]?.nomorHp && (
+                      <a
+                        href={`https://wa.me/${userMap[produk.ownerId].nomorHp}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-3 rounded-md font-semibold hover:bg-green-600 transition-colors text-sm"
+                        title="Hubungi via WhatsApp"
+                      >
+                        <IconWhatsApp className="h-4 w-4" />
+                        <span>Hubungi</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

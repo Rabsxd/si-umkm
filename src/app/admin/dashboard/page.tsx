@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useAdminNav } from '../useAdminNav';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, orderBy, query, where, getDoc } from 'firebase/firestore';
@@ -442,22 +443,22 @@ export default function AdminDashboardPage() {
   const { activeView } = useAdminNav();
 
   const renderView = () => {
-    switch(activeView) {
-        case 'pelatihan':
-            return <PelatihanView />;
-        case 'produk':
-            return <ProdukAdminView />; 
-        case 'user':
-            return <KelolaUserView />; // ✅ Menampilkan view baru
-        case 'dashboard':
-        default:
-            return <DashboardHomeView />;
+    switch (activeView) {
+      case 'pelatihan':
+        return <PelatihanView />;
+      case 'produk':
+        return <ProdukAdminView />;
+      case 'user':
+        return <KelolaUserView />;
+      case 'dashboard':
+      default:
+        return <Suspense fallback={<div>Memuat statistik...</div>}><DashboardHomeView /></Suspense>;
     }
   };
 
   return (
-      <div className="container mx-auto">
-          {renderView()}
-      </div>
+    <div className="container mx-auto">
+      {renderView()}
+    </div>
   );
 }

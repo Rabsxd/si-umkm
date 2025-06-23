@@ -4,14 +4,16 @@
   "private": true,
   "scripts": {
     "prebuild": "node remove-next-types.js",
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.8",
     "firebase": "^11.9.1",
     "firebase-admin": "^13.4.0",
+    "graphql": "^16.11.0",
     "next": "^14.2.30",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
