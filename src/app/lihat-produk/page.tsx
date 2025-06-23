@@ -173,7 +173,7 @@ export default function LihatProdukPage() {
                   <div className="p-4">
                     <h2 className="text-base font-bold text-gray-800 truncate">{produk.nama}</h2>
                     {/* <p className="text-xs text-gray-500 mt-1">
-                      Penjual: <span className="font-medium text-gray-700">{produk.namaPenjual || 'Tidak diketahui'}</span>
+                      Penjual: <span className="font-medium text-gray-600">{produk.namaPenjual || 'Tidak diketahui'}</span>
                     </p> */}
                     <p className="text-lg font-semibold text-blue-600 mt-1">{formatRupiah(produk.harga)}</p>
                   </div>
