@@ -185,23 +185,27 @@ export default function LoginPage() {
 
     return (
         <>
-            <main className="min-h-screen w-full flex">
-                <div className="hidden lg:flex lg:w-1/3 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-12 text-white relative overflow-hidden">
+            <main className="min-h-screen w-full flex flex-col lg:flex-row">
+                {/* Sidebar biru, tampil di atas pada mobile */}
+                <div className="flex w-full lg:w-1/3 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-8 sm:p-12 text-white relative overflow-hidden">
                     <div className="z-10 text-center">
                         <Image
                             src={logoSrc}
                             alt="Logo SI UMKM"
-                            width={120}
-                            height={120}
+                            width={100}
+                            height={100}
                             className="mx-auto mb-6 cursor-pointer"
                         />
-                        <h1 className="text-4xl font-bold tracking-tight">Si-UMKM</h1>
-                        <p className="mt-4 text-xl text-blue-100 max-w-sm">Platform Digital untuk membawa Usaha Mikro, Kecil, dan Menengah ke level selanjutnya.</p>
+                        <h1 className="text-3xl font-bold tracking-tight">Si-UMKM</h1>
+                        <p className="mt-4 text-base sm:text-xl text-blue-100 max-w-sm mx-auto">
+                            Platform Digital untuk membawa Usaha Mikro, Kecil, dan Menengah ke level selanjutnya.
+                        </p>
                     </div>
                     <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
                     <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
                 </div>
 
+                {/* Form login */}
                 <div className="w-full lg:w-2/3 flex items-center justify-center bg-gray-50 p-6 sm:p-12 relative">
                     <Link href="/" className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer">
                         <IconArrowLeft className="h-5 w-5" />
