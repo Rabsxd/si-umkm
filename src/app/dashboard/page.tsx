@@ -524,6 +524,7 @@ export default function DashboardPage() {
   const [editId, setEditId] = useState<string | undefined>(undefined);
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -567,6 +568,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
+      {/* SIDEBAR DESKTOP */}
       <aside className="hidden lg:flex flex-col w-64 bg-blue-800 text-white">
         <div className="flex items-center justify-between p-4 border-b border-blue-700">
             <div className="flex items-center gap-3"><Image src={logoSrc} alt="Logo" width={40} height={40} className="rounded-full" /><span>Si-UMKM</span></div>
@@ -581,9 +583,49 @@ export default function DashboardPage() {
         <div className="p-4 text-center text-xs text-blue-300">&copy; {new Date().getFullYear()} Si-UMKM</div>
       </aside>
 
-      <main className="flex-1 p-6 sm:p-10">
+      {/* SIDEBAR MOBILE (DRAWER) */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 flex">
+          <div className="relative flex flex-col w-64 bg-blue-800 text-white h-full">
+            <div className="flex items-center justify-between p-4 border-b border-blue-700">
+              <div className="flex items-center gap-3">
+                <Image src={logoSrc} alt="Logo" width={40} height={40} className="rounded-full" />
+                <span>Si-UMKM</span>
+              </div>
+              <button onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg hover:bg-blue-700 cursor-pointer">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <nav className="flex-1 px-2 py-4 space-y-2">
+              <button onClick={() => { handleNavigate('dashboard'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${activeView === 'dashboard' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconLayoutDashboard className="h-6 w-6" /><span>Dashboard</span></button>
+              <button onClick={() => { handleNavigate('produk'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${activeView === 'produk' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconBox className="h-6 w-6" /><span>Produk Saya</span></button>
+              <button onClick={() => { handleNavigate('tambah'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${activeView === 'tambah' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconPlusCircle className="h-6 w-6" /><span>Tambah Produk</span></button>
+              <button onClick={() => { handleNavigate('pengaturan'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${activeView === 'pengaturan' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconSettings className="h-6 w-6" /><span>Pengaturan</span></button>
+            </nav>
+            <div className="p-4 text-center text-xs text-blue-300">&copy; {new Date().getFullYear()} Si-UMKM</div>
+            <button onClick={handleLogout} title="Logout" className="w-full p-2 rounded-lg hover:bg-blue-700 cursor-pointer flex items-center justify-center gap-2 mt-2">
+              <IconLogout className="h-6 w-6" />
+              <span>Logout</span>
+            </button>
+          </div>
+          {/* Overlay */}
+          <div className="bg-white bg-opacity-30 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>        </div>
+      )}
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 p-4 sm:p-6 lg:p-10">
+        {/* Topbar mobile */}
+        <div className="lg:hidden flex items-center justify-between mb-4">
+          <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+          <div className="flex items-center gap-2">
+            <Image src={logoSrc} alt="Logo" width={32} height={32} className="rounded-full" />
+            <span className="font-bold text-blue-800">Si-UMKM</span>
+          </div>
+        </div>
         <div className="container mx-auto">
-            {renderActiveView()}
+          {renderActiveView()}
         </div>
       </main>
     </div>
