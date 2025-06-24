@@ -149,7 +149,6 @@ export default async function DetailProdukPage({ params, searchParams }: Props) 
           </div>
           
           <div className="mt-10 pt-8 border-t border-gray-200">
-             <h2 className="text-2xl font-bold text-gray-800 mb-4">Ulasan Produk</h2>
              <ClientUlasanWrapper produkId={id} />
           </div>
         </div>
