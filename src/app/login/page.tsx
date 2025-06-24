@@ -129,9 +129,9 @@ export default function LoginPage() {
         const userSnapshot = await getDoc(userDocRef);
 
         if (userSnapshot.exists() && userSnapshot.data().role === 'admin') {
-            router.push('/admin/dashboard'); // Arahkan ke dashboard admin
+            router.push('/admin/dashboard#dashboard'); // Arahkan ke dashboard admin
         } else {
-            router.push('/dashboard'); // Arahkan ke dashboard pengguna biasa
+            router.push('/dashboard#dashboard'); // Arahkan ke dashboard pengguna biasa
         }
     };
     

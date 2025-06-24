@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { AdminNavContext } from './admin-nav-context'; // Import dari file baru
+import { AdminNavContext, AdminView } from './admin-nav-context';
+import { useAdminNav } from './useAdminNav';
 
 // --- Ikon Sidebar ---
 const IconLayoutDashboard = (props: React.SVGProps<SVGSVGElement>) => (
@@ -38,8 +39,14 @@ const IconLogout = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const IconMenu = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+  </svg>
+);
+
 const Sidebar = () => {
-  const { activeView, setActiveView } = useContext(AdminNavContext);
+  const { activeView, setActiveView, isSidebarOpen, closeSidebar } = useAdminNav();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -48,44 +55,95 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: IconLayoutDashboard },
-    { id: 'pelatihan', label: 'Kelola Pelatihan', icon: IconBookOpen },
-    { id: 'produk', label: 'Kelola Produk', icon: IconBox },       // ✅ fix icon
-    { id: 'user', label: 'Kelola Pengguna', icon: IconUsers },         // ✅ fix icon
+    { id: 'dashboard' as AdminView, label: 'Dashboard', icon: IconLayoutDashboard },
+    { id: 'pelatihan' as AdminView, label: 'Kelola Pelatihan', icon: IconBookOpen },
+    { id: 'produk' as AdminView, label: 'Kelola Produk', icon: IconBox },
+    { id: 'user' as AdminView, label: 'Kelola Pengguna', icon: IconUsers },
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-gray-800 text-white">
-      <div className="flex items-center justify-between p-4 border-b border-gray-700">
-        <div className="flex items-center gap-3">
-          <span className="text-xl font-bold">ADMIN PANEL</span>
-        </div>
-        <button onClick={handleLogout} title="Logout" className="p-2 rounded-lg hover:bg-gray-700 cursor-pointer">
-          <IconLogout className="h-6 w-6" />
-        </button>
-      </div>
-      <nav className="flex-1 px-2 py-4 space-y-2">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveView(item.id)}
-            className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
-              activeView === item.id ? 'bg-blue-600' : 'hover:bg-gray-700'
-            }`}
-          >
-            <item.icon className="h-6 w-6" />
-            <span>{item.label}</span>
+    <>
+      {/* Overlay untuk menutup sidebar di mobile */}
+      {isSidebarOpen && <div onClick={closeSidebar} className="fixed inset-0 z-20 bg-black/50 lg:hidden" />}
+
+      <aside
+        className={`fixed top-0 left-0 z-30 flex h-full w-64 transform flex-col bg-gray-800 text-white transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          <div className="flex items-center gap-3">
+            <span className="text-xl font-bold">ADMIN PANEL</span>
+          </div>
+          {/* Tombol logout ini hanya untuk mobile, di dalam sidebar */}
+          <button onClick={handleLogout} title="Logout" className="p-2 rounded-lg hover:bg-gray-700 cursor-pointer lg:hidden">
+            <IconLogout className="h-6 w-6" />
           </button>
-        ))}
-      </nav>
-    </aside>
+        </div>
+        <nav className="flex-1 px-2 py-4 space-y-2">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveView(item.id)}
+              className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
+                activeView === item.id ? 'bg-blue-600' : 'hover:bg-gray-700'
+              }`}
+            >
+              <item.icon className="h-6 w-6" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+        {/* Tombol logout untuk desktop di bagian bawah */}
+        <div className="p-4 border-t border-gray-800 hidden lg:block">
+           <button onClick={handleLogout} className="w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-700">
+              <IconLogout className="h-6 w-6" />
+              <span>Logout</span>
+           </button>
+        </div>
+      </aside>
+    </>
   );
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+const MobileHeader = () => {
+  const { toggleSidebar } = useAdminNav();
+  return (
+    <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-4 bg-gray-700 border-b lg:hidden">
+      <button onClick={toggleSidebar} className="text-white" aria-label="Buka menu">
+        <IconMenu className="w-6 h-6" />
+      </button>
+      <span className="text-lg font-bold">Admin Panel</span>
+      <div className="w-6" /> {/* Spacer agar judul di tengah */}
+    </header>
+  );
+};
+
+export default function AdminLayout({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState('dashboard');
+  const [activeView, _setActiveView] = useState<AdminView>('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
+
+  // Baca hash saat mount
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '') as AdminView;
+    if (hash && ['dashboard', 'pelatihan', 'produk', 'user'].includes(hash)) {
+      _setActiveView(hash);
+    }
+  }, []);
+
+  // Update activeView saat hash berubah (back/forward)
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.replace('#', '') as AdminView;
+      if (hash && ['dashboard', 'pelatihan', 'produk', 'user'].includes(hash)) {
+        _setActiveView(hash);
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -108,13 +166,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return <div className="flex h-screen items-center justify-center">Memverifikasi akses admin...</div>;
   }
 
+  // Fungsi-fungsi yang akan dimasukkan ke context
+  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+  const closeSidebar = () => setIsSidebarOpen(false);
+  const setActiveView = (view: AdminView) => {
+    window.location.hash = view; // update hash, trigger hashchange
+    closeSidebar();
+  };
+
   return (
-    <AdminNavContext.Provider value={{ activeView, setActiveView }}>
-      <div className="flex min-h-screen bg-gray-100">
-        <Sidebar />
-        <main className="flex-1 p-6 sm:p-10">
-          {children}
-        </main>
+    <AdminNavContext.Provider value={{ activeView, setActiveView, isSidebarOpen, toggleSidebar, closeSidebar }}>
+      <div className="min-h-screen bg-gray-100">
+        <Sidebar /> {/* Sidebar sekarang mengatur visibilitasnya sendiri */}
+        <div className="flex flex-col flex-1 lg:ml-64">
+          <MobileHeader />
+          <main className="flex-1 p-6 sm:p-10">
+            {children}
+          </main>
+        </div>
       </div>
     </AdminNavContext.Provider>
   );
