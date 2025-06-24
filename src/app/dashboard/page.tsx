@@ -602,33 +602,36 @@ export default function DashboardPage() {
       </aside>
 
       {/* SIDEBAR MOBILE (DRAWER) */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 flex">
-          <div className="relative flex flex-col w-64 bg-blue-800 text-white h-full">
-            <div className="flex items-center justify-between p-4 border-b border-blue-700">
-              <div className="flex items-center gap-3">
-                <Image src={logoSrc} alt="Logo" width={40} height={40} className="rounded-full" />
-                <span>Si-UMKM</span>
-              </div>
-              <button onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg hover:bg-blue-700 cursor-pointer">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+      <div className={`fixed inset-0 z-40 flex lg:hidden ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+        {/* Overlay */}
+        <div className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out ${mobileMenuOpen ? 'opacity-60' : 'opacity-0'}`} onClick={() => setMobileMenuOpen(false)}></div>
+
+        {/* Sidebar Panel */}
+        <div className={`relative flex flex-col w-64 bg-blue-800 text-white h-full shadow-xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="flex items-center justify-between p-4 border-b border-blue-700">
+            <div className="flex items-center gap-3">
+              <Image src={logoSrc} alt="Logo" width={40} height={40} className="rounded-full" />
+              <span className="font-semibold">Si-UMKM</span>
             </div>
-            <nav className="flex-1 px-2 py-4 space-y-2">
-              <button onClick={() => { handleNavigate('dashboard'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${activeView === 'dashboard' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconLayoutDashboard className="h-6 w-6" /><span>Dashboard</span></button>
-              <button onClick={() => { handleNavigate('produk'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${activeView === 'produk' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconBox className="h-6 w-6" /><span>Produk Saya</span></button>
-              <button onClick={() => { handleNavigate('tambah'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${activeView === 'tambah' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconPlusCircle className="h-6 w-6" /><span>Tambah Produk</span></button>
-              <button onClick={() => { handleNavigate('pengaturan'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${activeView === 'pengaturan' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconSettings className="h-6 w-6" /><span>Pengaturan</span></button>
-            </nav>
-            <div className="p-4 text-center text-xs text-blue-300">&copy; {new Date().getFullYear()} Si-UMKM</div>
-            <button onClick={handleLogout} title="Logout" className="w-full p-2 rounded-lg hover:bg-blue-700 cursor-pointer flex items-center justify-center gap-2 mt-2">
-              <IconLogout className="h-6 w-6" />
-              <span>Logout</span>
+            <button onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white cursor-pointer">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
-          {/* Overlay */}
-          <div className="bg-white bg-opacity-30 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>        </div>
-      )}
+          <nav className="flex-1 px-2 py-4 space-y-2">
+            <button onClick={() => { handleNavigate('dashboard'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'dashboard' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconLayoutDashboard className="h-6 w-6" /><span>Dashboard</span></button>
+            <button onClick={() => { handleNavigate('produk'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'produk' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconBox className="h-6 w-6" /><span>Produk Saya</span></button>
+            <button onClick={() => { handleNavigate('tambah'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'tambah' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconPlusCircle className="h-6 w-6" /><span>Tambah Produk</span></button>
+            <button onClick={() => { handleNavigate('pengaturan'); setMobileMenuOpen(false); }} className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer transition-colors ${activeView === 'pengaturan' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}><IconSettings className="h-6 w-6" /><span>Pengaturan</span></button>
+          </nav>
+          <div className="mt-auto">
+            <div className="p-4 text-center text-xs text-blue-300 border-t border-blue-700/50">&copy; {new Date().getFullYear()} Si-UMKM</div>
+            <button onClick={handleLogout} title="Logout" className="w-full p-4 bg-blue-900 hover:bg-blue-700 cursor-pointer flex items-center justify-center gap-3 transition-colors">
+              <IconLogout className="h-6 w-6" />
+              <span className="font-semibold">Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* MAIN CONTENT */}
       <main className="flex-1 p-4 sm:p-6 lg:p-10">
