@@ -519,12 +519,35 @@ const PengaturanView = ({ user }: { user: User | null }) => {
 
 // --- Komponen Dashboard Utama ---
 export default function DashboardPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState('dashboard');
   const [editId, setEditId] = useState<string | undefined>(undefined);
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Baca hash saat mount
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) setActiveView(hash);
+  }, []);
+
+  // Update menu saat hash berubah (back/forward)
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) setActiveView(hash);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  // Navigasi menu + update hash
+  const handleNavigate = (view: string, id?: string) => {
+    setActiveView(view);
+    setEditId(id);
+    window.location.hash = view;
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -543,11 +566,6 @@ export default function DashboardPage() {
     router.push('/login');
   };
   
-  const handleNavigate = (view: string, id?: string) => {
-      setActiveView(view);
-      setEditId(id);
-  };
-
   const renderActiveView = () => {
       switch(activeView) {
           case 'produk':
