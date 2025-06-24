@@ -185,7 +185,7 @@ export default function LoginPage() {
 
     return (
         <>
-            <main className="min-h-screen w-full flex flex-col lg:flex-row">
+            <main className="min-h-screen bg-gray-50">
                 {/* Sidebar biru, tampil di atas pada mobile */}
                 <div className="flex w-full lg:w-1/3 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-8 sm:p-12 text-white relative overflow-hidden">
                     <div className="z-10 text-center">
